@@ -215,7 +215,7 @@ const DbDetailsForm = () => {
           padding: "25px",
           borderRadius: 2,
           boxShadow: "0px 8px 24px rgba(17, 17, 17, 0.24)",
-          height: 390,
+          height: 360,
         }}
       >
         <ToggleButtonGroup
@@ -256,6 +256,7 @@ const DbDetailsForm = () => {
                         value={host}
                         onChange={(e) => setHost(e.target.value)}
                         fullWidth
+                        size={"small"}
                       />
                     </Stack>
                     <Stack width="100%">
@@ -271,6 +272,7 @@ const DbDetailsForm = () => {
                         value={database}
                         onChange={(e) => setDatabase(e.target.value)}
                         fullWidth
+                        size={"small"}
                       />
                     </Stack>
                   </Stack>
@@ -287,6 +289,7 @@ const DbDetailsForm = () => {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       fullWidth
+                      size={"small"}
                     />
                   </Stack>
                   <Stack width="100%">
@@ -303,6 +306,7 @@ const DbDetailsForm = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       fullWidth
+                      size={"small"}
                     />
                   </Stack>
                 </Stack>
