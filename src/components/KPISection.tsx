@@ -13,7 +13,7 @@ import nextArrow from "../shared/images/nextArrow.svg";
 import { useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import kpiAtom from "../models/kpiAtom";
-import { getGraphData } from "../services/queries";
+import { getGraphData,getGraphDataDb } from "../services/queries";
 import textSelectedImage from "../shared/images/textSelected.svg";
 import graphSelectedImage from "../shared/images/graphSelected.svg";
 import textImage from "../shared/images/textIcon.svg";
@@ -63,7 +63,7 @@ export const KPISection = () => {
         setSelectedKPI(questions.length);
       }
 
-      getGraphData(
+      getGraphDataDb(
         formData,
         dataType,
         setIsLoading,
@@ -87,7 +87,7 @@ export const KPISection = () => {
       setSelectedKPI(0);
       if (newAlignment === "graph" && kpis.length > 0) {
         setIsLoading(true);
-        getGraphData(
+        getGraphDataDb(
           formData,
           newAlignment,
           setIsLoading,
@@ -100,7 +100,7 @@ export const KPISection = () => {
         );
       } else if (newAlignment === "text" && questions.length > 0) {
         setIsLoading(true);
-        getGraphData(
+        getGraphDataDb(
           formData,
           newAlignment,
           setIsLoading,
@@ -198,7 +198,7 @@ export const KPISection = () => {
                 <TextField
                   onClick={() => {
                     setIsLoading(true);
-                    getGraphData(
+                    getGraphDataDb(
                       formData,
                       dataType,
                       setIsLoading,
@@ -244,7 +244,7 @@ export const KPISection = () => {
               <TextField
                 onClick={() => {
                   setIsLoading(true);
-                  getGraphData(
+                  getGraphDataDb(
                     formData,
                     dataType,
                     setIsLoading,

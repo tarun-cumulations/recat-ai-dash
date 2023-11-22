@@ -2,40 +2,48 @@
 import React, { useState, useRef } from 'react';
 //import './App.css';
 import { Button, Stack, TextField, IconButton, ToggleButtonGroup, ToggleButton ,Typography} from "@mui/material";
-import csvImage from "../shared/images/csvImage.svg";
-import frameImage from "../shared/images/Frame.svg";
-import addMoreImage from "../shared/images/addMore.svg";
 import { useRecoilState, useSetRecoilState } from "recoil";
+import { LoadingButton } from "@mui/lab";
+import CloseIcon from '@mui/icons-material/Close';
+import CsvDragDropFiles from "../components/CsvDragFiles";
 import loadingAtom from "../models/loadingAtom";
-import { getKPIData } from "../services/queries";
+import errorAtom from "../models/errorAtom";
+import dbConfigAtom from "../models/dbConfigAtom"; 
+import {getGraphDataDb} from "../services/queries"
+import questionAtom from "../models/questionAtom";
+import textResponseAtom from "../models/textResponseAtom";
+import queryAtom from "../models/queryAtom";
 import kpiAtom from "../models/kpiAtom";
 import formDataAtom from "../models/formDataAtom";
 import graphTypeAtom from "../models/graphTypeAtom";
 import graphDataAtom from "../models/graphDataAtom";
-import { LoadingButton } from "@mui/lab";
-import errorAtom from "../models/errorAtom";
-import { Close } from "@mui/icons-material";
-import { isEmpty, isEqual } from "lodash";
-import questionAtom from "../models/questionAtom";
-import textResponseAtom from "../models/textResponseAtom";
-import queryAtom from "../models/queryAtom";
 import fileUploadAtom from "../models/fileUploadAtom";
-import CloseIcon from '@mui/icons-material/Close';
+import { getKPIDataSql } from "../services/queries";
 
 
-const DragDropFiles = () => {
+const DbDetailsForm = () => {
+
+  
+  const [files, setFiles] = useState<FileList | null>(null);
+  const setFormData = useSetRecoilState(formDataAtom);
+  const setKpis = useSetRecoilState<string[]>(kpiAtom);
+  const setQuestions = useSetRecoilState<string[]>(questionAtom);
+  const [isLoading, setIsLoading] = useRecoilState<boolean>(loadingAtom);
+  const setGraphData = useSetRecoilState<OutputData>(graphDataAtom);
+  const setTextResponse = useSetRecoilState<string>(textResponseAtom);
+  const setGraphType = useSetRecoilState<string>(graphTypeAtom);
+  const [concat, setConcat] = useState<boolean>(false);
+  const setError = useSetRecoilState<string>(errorAtom);
+  //const setIsFileUploaded = useSetRecoilState<boolean>(fileUploadAtom);
+  const setQuery = useSetRecoilState<string>(queryAtom);
+  const [isFileUploaded, setIsFileUploaded] = useState(false);
+  // Local state for form fields
   const [host, setHost] = useState('');
-  const [port, setPort] = useState('');
+  const [database, setDatabase] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [files, setFiles] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const inputRef = useRef(null);
-  const [selectedOption, setSelectedOption] = useState('db'); 
-
-  const handleDragOver = (event) => {
-    event.preventDefault();
-  };
+  const [selectedOption, setSelectedOption] = useState('db');
+  const setDbConfig = useSetRecoilState(dbConfigAtom);
 
   const styles = {
     connectDB: {
@@ -156,54 +164,54 @@ const DragDropFiles = () => {
       width: '100%', // Container takes full width
     }
   };
- 
-  const handleDrop = (event) => {
-    event.preventDefault();
-    setFiles(event.dataTransfer.files);
-  };
 
-  const handleFileChange = (event) => {
-    setFiles(event.target.files);
-  };
-
-  const handleDbConnect = async (event) => {
+  const handleDbConnect = async (event: React.SyntheticEvent) => {
     event.preventDefault();
+    setKpis([]);
+    setIsFileUploaded(false);
+    setQuestions([]);
     setIsLoading(true);
-    // Here you should send the connection details to your server
-    // For demonstration, we're just logging to the console
-    console.log('Attempting to connect to the database with', { host, port, username, password });
-    // Simulate an API call
-    setTimeout(() => {
-      setIsLoading(false);
-      console.log('Connected to the database successfully');
-    }, 2000);
-  };
+    
+  
+    const newFormData = new FormData();
 
-  const fileElements = files ? Array.from(files).map((file, index) => (
-    <Stack key={index} direction="row" alignItems="center" spacing={1}>
-      <span>{file.name}</span>
-      <IconButton size="small" onClick={() => removeFile(index)}>
-        <CloseIcon fontSize="inherit" />
-      </IconButton>
-    </Stack>
-  )) : null;
+    // Append the form data fields
+    newFormData.append('db_host', host);
+    newFormData.append('db_name', database);
+    newFormData.append('db_user', username);
+    newFormData.append('db_pass', password);
 
-  const removeFile = (fileIndex) => {
-    setFiles((currentFiles) => {
-      const newFiles = Array.from(currentFiles);
-      newFiles.splice(fileIndex, 1);
-      return newFiles.length > 0 ? new FileListItems(newFiles) : null;
+    localStorage.setItem('db_host', host);
+    localStorage.setItem('db_name', database);
+    localStorage.setItem('db_user', username);
+    localStorage.setItem('db_pass', password);
+    localStorage.setItem('currentContext', 'db');
+
+    setDbConfig({
+      host: host,
+      database: database,
+      user: username,
+      password: password,
     });
+
+    // Set the new FormData in the state
+    setFormData(newFormData);
+
+    getKPIDataSql(
+      newFormData,
+      setIsLoading,
+      setQuestions,
+      setKpis,
+      setError,
+      setGraphType,
+      setGraphData,
+      setTextResponse,
+      setQuery,
+      setIsFileUploaded
+    );
   };
 
 
-  let handleFileInputChange =async()=>{
-    console.log("CSV slected")
-  }
-
-  let handleFileUpload = async()=>{
-    console.log("Handled")
-  }
 
 return (
   <div style={{ padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#F2F4F6' }}>
@@ -218,7 +226,7 @@ return (
         value={selectedOption}
         exclusive
         onChange={(event, newOption) => setSelectedOption(newOption)}
-        sx={{ width: '100%', marginBottom: '20px' }} // General styles for the group
+        sx={{ width: '100%', marginBottom: '20px' }} 
       >
         <ToggleButton value="db" sx={styles.connectDB}>
           Connect DB
@@ -229,6 +237,7 @@ return (
       </ToggleButtonGroup>
 
       {selectedOption === 'db' && (
+        
         <form onSubmit={handleDbConnect} style={{ width: '100%' }}>
           <Stack spacing={2} direction="column" sx={{ width: '100%' }}>
             {<form onSubmit={handleDbConnect} style={{ width: '100%' }}>
@@ -244,8 +253,8 @@ return (
             <TextField
               label="Database"
               variant="outlined"
-              value={port}
-              onChange={(e) => setPort(e.target.value)}
+              value={database}
+              onChange={(e) => setDatabase(e.target.value)}
               fullWidth
             />
             <TextField
@@ -272,7 +281,7 @@ return (
           <div style={styles.submitButtonContainer}>
             <LoadingButton
               loading={isLoading}
-              onClick={handleFileUpload}
+              type="submit"
               variant="contained"
               sx={styles.submitButton}
             >
@@ -283,31 +292,7 @@ return (
       )}
 
 {selectedOption === 'csv' && (
-    <Stack spacing={2} direction="column" sx={{ width: '100%' }}>
-      <Typography sx={styles.uploadCSVLabel}>Upload file</Typography>
-      <Button
-        variant="contained"
-        component="label"
-        sx={styles.uploadCSVButton2}
-      >
-        Upload CSV
-        <input
-          type="file"
-          hidden
-          onChange={handleFileInputChange}
-        />
-      </Button>
-      <div style={styles.submitButtonContainer}>
-            <LoadingButton
-              loading={isLoading}
-              onClick={handleFileUpload}
-              variant="contained"
-              sx={styles.submitButton}
-            >
-              Submit
-            </LoadingButton>
-      </div>
-    </Stack>
+    <CsvDragDropFiles />
   )}
 
     </Stack>
@@ -317,11 +302,7 @@ return (
 
 
 
-// Helper function to create a new FileList since FileList itself is read-only
-function FileListItems(files) {
-  const b = new ClipboardEvent('').clipboardData || new DataTransfer();
-  for (let i = 0, len = files.length; i<len; i++) b.items.add(files[i]);
-  return b.files;
-}
 
-export default DragDropFiles;
+
+
+export default DbDetailsForm;

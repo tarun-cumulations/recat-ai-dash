@@ -1,11 +1,13 @@
-import { Stack } from "@mui/material";
-import DragDropFiles from "../components/DragFiles";
+import { Box, Stack } from "@mui/material";
+import DbDetailsForm from "../components/DbDetails";
+import CsvDragDropFiles from "../components/CsvDragFiles";
 import { KPISection } from "../components/KPISection";
 import { GraphSection } from "../components/GraphSection";
 import { useRecoilValue } from "recoil";
 import kpiAtom from "../models/kpiAtom";
 import questionAtom from "../models/questionAtom";
 import fileUploadAtom from "../models/fileUploadAtom";
+import { KPISectionCSV } from "../components/KPISectionCsv";
 
 export const Dashboard = () => {
   const kpis = useRecoilValue<string[]>(kpiAtom);
@@ -13,53 +15,45 @@ export const Dashboard = () => {
   const isFileUploaded = useRecoilValue<boolean>(fileUploadAtom);
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         minHeight: "calc(100vh - 30px)",
         background: "#F2F4F6",
         padding: "15px 60px",
+        overflow: "hidden", 
       }}
     >
-      <Stack
-        sx={{
-          background: "#FFF",
-          height: "245px",
-          margin: "13px 57px 30px",
-          borderRadius: "16px",
-          minWidth: "1090px",
-        }}
+      <DbDetailsForm /> 
+      <Box
+        sx={{ margin: "0 57px", display: 'flex', flexDirection: 'row', gap: '20px' }}
       >
-        <DragDropFiles />
-      </Stack>
-      <Stack
-        direction={"row"}
-        gap={4}
-        sx={{ margin: "0 57px", minHeight: "560px" }}
-      >
-        {isFileUploaded && (
-          <Stack
+        {true && (
+          <Box
             sx={{
               background: "#FFF",
-              minWidth: "480px",
+              width: "480px", 
               borderRadius: "16px",
+              flexShrink: 0, 
+              overflow: "auto", 
             }}
           >
-            <KPISection />
-          </Stack>
+
+        {localStorage.getItem('currentContext') === 'db' ? <KPISection /> : <KPISectionCSV />}
+          </Box>
         )}
-        {(kpis.length > 0 || questions.length > 0) && isFileUploaded && (
-          <Stack
+        {(kpis.length > 0 || questions.length > 0) && true && (
+          <Box
             sx={{
               background: "#FFF",
-              minWidth: "580px",
-              width: "100%",
+              flexGrow: 1, 
               borderRadius: "16px",
+              overflow: "auto", 
             }}
           >
             <GraphSection />
-          </Stack>
+          </Box>
         )}
-      </Stack>
-    </div>
+      </Box>
+    </Box>
   );
 };
