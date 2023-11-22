@@ -1,10 +1,6 @@
 import axios from "axios";
 import { convertData } from "./helper";
 import { cloneDeep } from "lodash";
-import { useSetRecoilState } from "recoil";
-import { setIsFileUploaded } from "../models/fileUploadAtom";
-
-
 
 export const getKPIData = (
   formData,
@@ -18,8 +14,8 @@ export const getKPIData = (
   setQuery
 ) => {
   axios
-    .post("http://localhost:5000/generate-kpi-and-questions", formData, {
-      // .post("http://15.206.91.113:5000/generate-kpi-and-questions", formData, {
+    // .post("http://localhost:5000/generate-kpi-and-questions", formData, {
+    .post("http://15.206.91.113:3000/generate-kpi-and-questions", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -69,8 +65,8 @@ export const getGraphData = (
   formData.append("mode", dataType);
   setQuery(kpi);
   axios
-    .post("http://localhost:5000/get-analytics-csv", formData, {
-      //  .post("http://15.206.91.113:5000/get-analytics", formData, {
+    // .post("http://localhost:5000/get-analytics-csv", formData, {
+    .post("http://15.206.91.113:3000/get-analytics-csv", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -128,15 +124,15 @@ export const getGraphDataDb = (
   let formData = new FormData();
   formData.append("query", kpi);
   formData.append("mode", dataType); // Use the dataType parameter
-  formData.append("db_host", localStorage.getItem('db_host'));
-  formData.append("db_name", localStorage.getItem('db_name'));
-  formData.append("db_user", localStorage.getItem('db_user'));
-  formData.append("db_pass", localStorage.getItem('db_pass'));
-  console.log(formData)
-  console.log("password is ",dbConfig.password)
+  formData.append("db_host", localStorage.getItem("db_host"));
+  formData.append("db_name", localStorage.getItem("db_name"));
+  formData.append("db_user", localStorage.getItem("db_user"));
+  formData.append("db_pass", localStorage.getItem("db_pass"));
+  console.log(formData);
+  console.log("password is ", dbConfig.password);
 
   axios
-    .post("http://localhost:5000/get-analytics-sql", formData, {
+    .post("http://15.206.91.113:3000/get-analytics-sql", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -174,8 +170,6 @@ export const getGraphDataDb = (
       setIsLoading(false);
     });
 };
-
-
 
 // export const getGraphDataDb = (
 //   dbConfig,
@@ -240,8 +234,6 @@ export const getGraphDataDb = (
 //     });
 // };
 
-
-
 export const getKPIDataSql = async (
   formData,
   setIsLoading,
@@ -255,17 +247,23 @@ export const getKPIDataSql = async (
   setIsFileUploaded
 ) => {
   try {
-    const response = await axios.post("http://localhost:5000/generate-kpi-and-questions-sql", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await axios.post(
+      "http://15.206.91.113:3000/generate-kpi-and-questions-sql",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
     // Handle successful response
     const { KPIs, Questions } = response.data;
 
     // Cleanup formData
-    ["db_host", "db_name", "db_user", "db_pass"].forEach(key => formData.delete(key));
+    ["db_host", "db_name", "db_user", "db_pass"].forEach((key) =>
+      formData.delete(key)
+    );
 
     // Update state
     setKpis(KPIs);
@@ -273,7 +271,17 @@ export const getKPIDataSql = async (
     setIsFileUploaded(true);
 
     if (KPIs && KPIs[0]) {
-      getGraphDataDb(formData, "graph", setIsLoading, KPIs[0], setGraphType, setGraphData, setTextResponse, setError, setQuery);
+      getGraphDataDb(
+        formData,
+        "graph",
+        setIsLoading,
+        KPIs[0],
+        setGraphType,
+        setGraphData,
+        setTextResponse,
+        setError,
+        setQuery
+      );
       setError("");
     } else {
       setError("No KPIs found, try some custom KPI");
@@ -286,5 +294,3 @@ export const getKPIDataSql = async (
     setIsLoading(false);
   }
 };
-
-

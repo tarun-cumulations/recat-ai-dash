@@ -1,15 +1,23 @@
 //@ts-nocheck
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 //import './App.css';
-import { Button, Stack, TextField, IconButton, ToggleButtonGroup, ToggleButton ,Typography} from "@mui/material";
+import {
+  Button,
+  Stack,
+  TextField,
+  IconButton,
+  ToggleButtonGroup,
+  ToggleButton,
+  Typography,
+} from "@mui/material";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { LoadingButton } from "@mui/lab";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import CsvDragDropFiles from "../components/CsvDragFiles";
 import loadingAtom from "../models/loadingAtom";
 import errorAtom from "../models/errorAtom";
-import dbConfigAtom from "../models/dbConfigAtom"; 
-import {getGraphDataDb} from "../services/queries"
+import dbConfigAtom from "../models/dbConfigAtom";
+import { getGraphDataDb } from "../services/queries";
 import questionAtom from "../models/questionAtom";
 import textResponseAtom from "../models/textResponseAtom";
 import queryAtom from "../models/queryAtom";
@@ -20,10 +28,7 @@ import graphDataAtom from "../models/graphDataAtom";
 import fileUploadAtom from "../models/fileUploadAtom";
 import { getKPIDataSql } from "../services/queries";
 
-
 const DbDetailsForm = () => {
-
-  
   const [files, setFiles] = useState<FileList | null>(null);
   const setFormData = useSetRecoilState(formDataAtom);
   const setKpis = useSetRecoilState<string[]>(kpiAtom);
@@ -38,131 +43,110 @@ const DbDetailsForm = () => {
   const setQuery = useSetRecoilState<string>(queryAtom);
   const [isFileUploaded, setIsFileUploaded] = useState(false);
   // Local state for form fields
-  const [host, setHost] = useState('');
-  const [database, setDatabase] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [selectedOption, setSelectedOption] = useState('db');
+  const [host, setHost] = useState("");
+  const [database, setDatabase] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [selectedOption, setSelectedOption] = useState("db");
   const setDbConfig = useSetRecoilState(dbConfigAtom);
 
   const styles = {
     connectDB: {
       // Assuming you want a default style for the non-selected state
-      '&.MuiToggleButton-root': {
-        color: '#96969A', // Non-selected state color
-        fontSize: '14px',
-        fontFamily: 'Inter',
-        fontWeight: '500',
-        lineHeight: '18px',
+      "&.MuiToggleButton-root": {
+        color: "#96969A", // Non-selected state color
+        fontSize: "14px",
+        fontFamily: "Inter",
+        textTransform: "none",
+        fontWeight: "500",
+        lineHeight: "18px",
       },
-      '&.Mui-selected': {
-        color: 'white',
-        backgroundColor: '#4FD1C5', 
-        fontSize: '16px',
-        fontFamily: 'Inter',
-        fontWeight: '600',
-        lineHeight: '18px',
+      "&.Mui-selected": {
+        color: "white",
+        backgroundColor: "#4FD1C5",
+        fontSize: "14px",
+        fontFamily: "Inter",
+        fontWeight: "600",
+        lineHeight: "18px",
       },
-      '&.MuiToggleButton-root:hover': {
-        backgroundColor: '#35a0a7', 
+      "&.MuiToggleButton-root:hover": {
+        backgroundColor: "#35a0a7",
       },
     },
     uploadCSVButton: {
-      
-      '&.MuiToggleButton-root': {
-        color: '#4FD1C5', 
-        fontSize: '14px',
-        fontFamily: 'Inter',
-        fontWeight: '500',
-        lineHeight: '18px',
+      "&.MuiToggleButton-root": {
+        color: "#4FD1C5",
+        textTransform: "none",
+        fontSize: "14px",
+        fontFamily: "Inter",
+        fontWeight: "500",
+        lineHeight: "18px",
       },
-      '&.Mui-selected': {
-        color: 'white',
-        backgroundColor: '#4FD1C5', 
-        fontSize: '16px',
-        fontFamily: 'Inter',
-        fontWeight: '600',
-        lineHeight: '18px',
+      "&.Mui-selected": {
+        color: "white",
+        backgroundColor: "#4FD1C5",
+        fontSize: "14px",
+        fontFamily: "Inter",
+        fontWeight: "600",
+        lineHeight: "18px",
       },
-      '&.MuiToggleButton-root:hover': {
-        backgroundColor: '#35a0a7', 
+      "&.MuiToggleButton-root:hover": {
+        backgroundColor: "#35a0a7",
       },
     },
     uploadFileLabel: {
-      color: '#3C4858',
-      fontSize: '14px',
-      fontFamily: 'Inter',
-      fontWeight: '600',
-      lineHeight: '20px',
-      wordWrap: 'break-word',
+      color: "#3C4858",
+      fontSize: "14px",
+      fontFamily: "Inter",
+      fontWeight: "600",
+      lineHeight: "20px",
+      wordWrap: "break-word",
     },
     uploadCSVLabel: {
-      color: 'white',
-      fontSize: '12px',
-      fontFamily: 'Inter',
-      fontWeight: '600',
-      lineHeight: '16px',
-      wordWrap: 'break-word',
+      color: "white",
+      fontSize: "12px",
+      fontFamily: "Inter",
+      fontWeight: "600",
+      lineHeight: "16px",
+      wordWrap: "break-word",
     },
-    submitButton: {
-      backgroundColor: '#4FD1C5', 
-    color: 'white', 
-    fontSize: '14px', 
-    fontFamily: 'Inter', 
-    fontWeight: '600', 
-    lineHeight: '20px', 
-    textTransform: 'none', 
-    borderRadius: '4px', 
-    boxShadow: 'none', 
-    '&:hover': {
-      backgroundColor: '#35a0a7', 
-    },
-    width: 'fit-content', 
-    padding: '10px 20px', 
-    
-    },
-    textFieldStyles : {
-      width: '352px', 
-    height: '42px', 
-    backgroundColor: 'white', 
-    borderRadius: '6px', 
-    border: '1px solid #C0CCDA', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    display: 'inline-flex', 
-    '& .MuiOutlinedInput-root': { 
-      height: '100%', 
-      borderRadius: '6px', 
-    },
-    '& .MuiOutlinedInput-notchedOutline': { 
-      border: '1px solid #C0CCDA', 
-    },
-    '& .MuiInputBase-input': { 
-      height: '100%', 
-      boxSizing: 'border-box', 
-    },
+    textFieldStyles: {
+      width: "352px",
+      height: "42px",
+      backgroundColor: "white",
+      borderRadius: "6px",
+      border: "1px solid #C0CCDA",
+      justifyContent: "center",
+      alignItems: "center",
+      display: "inline-flex",
+      "& .MuiOutlinedInput-root": {
+        height: "100%",
+        borderRadius: "6px",
+      },
+      "& .MuiOutlinedInput-notchedOutline": {
+        border: "1px solid #C0CCDA",
+      },
+      "& .MuiInputBase-input": {
+        height: "100%",
+        boxSizing: "border-box",
+      },
     },
     uploadCSVButton2: {
       // Styling for the "Upload CSV" button
-      backgroundColor: '#4FD1C5',
-      color: 'white',
-      textTransform: 'none',
-      fontWeight: '600',
-      fontSize: '14px',
-      lineHeight: '20px',
-      boxShadow: 'none',
-      '&:hover': {
-        backgroundColor: '#35a0a7',
+      backgroundColor: "#4FD1C5",
+      color: "white",
+      textTransform: "none",
+      fontWeight: "600",
+      fontSize: "14px",
+      lineHeight: "20px",
+      boxShadow: "none",
+      "&:hover": {
+        backgroundColor: "#35a0a7",
       },
-      borderRadius: '4px',
-      width: '200px', 
-      padding: '10px 20px',
+      borderRadius: "4px",
+      width: "200px",
+      padding: "10px 20px",
     },
-    submitButtonContainer: {
-      display: 'flex',
-      justifyContent: 'flex-end', // This pushes the button to the right
-      width: '100%', // Container takes full width
-    }
   };
 
   const handleDbConnect = async (event: React.SyntheticEvent) => {
@@ -171,21 +155,20 @@ const DbDetailsForm = () => {
     setIsFileUploaded(false);
     setQuestions([]);
     setIsLoading(true);
-    
-  
+
     const newFormData = new FormData();
 
     // Append the form data fields
-    newFormData.append('db_host', host);
-    newFormData.append('db_name', database);
-    newFormData.append('db_user', username);
-    newFormData.append('db_pass', password);
+    newFormData.append("db_host", host);
+    newFormData.append("db_name", database);
+    newFormData.append("db_user", username);
+    newFormData.append("db_pass", password);
 
-    localStorage.setItem('db_host', host);
-    localStorage.setItem('db_name', database);
-    localStorage.setItem('db_user', username);
-    localStorage.setItem('db_pass', password);
-    localStorage.setItem('currentContext', 'db');
+    localStorage.setItem("db_host", host);
+    localStorage.setItem("db_name", database);
+    localStorage.setItem("db_user", username);
+    localStorage.setItem("db_pass", password);
+    localStorage.setItem("currentContext", "db");
 
     setDbConfig({
       host: host,
@@ -211,98 +194,150 @@ const DbDetailsForm = () => {
     );
   };
 
-
-
-return (
-  <div style={{ padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#F2F4F6' }}>
-    <Stack
-      spacing={2}
-      justifyContent="center"
-      alignItems="center"
-      sx={{ width: 800, background: 'white', padding: '20px', borderRadius: 2, boxShadow: '0px 8px 24px rgba(17, 17, 17, 0.24)' }}
+  return (
+    <div
+      style={{
+        padding: "20px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100%",
+        background: "#F2F4F6",
+      }}
     >
-      <ToggleButtonGroup
-        color="primary"
-        value={selectedOption}
-        exclusive
-        onChange={(event, newOption) => setSelectedOption(newOption)}
-        sx={{ width: '100%', marginBottom: '20px' }} 
+      <Stack
+        spacing={2}
+        // justifyContent="center"
+        alignItems="center"
+        sx={{
+          width: 800,
+          background: "white",
+          padding: "25px",
+          borderRadius: 2,
+          boxShadow: "0px 8px 24px rgba(17, 17, 17, 0.24)",
+          height: 390,
+        }}
       >
-        <ToggleButton value="db" sx={styles.connectDB}>
-          Connect DB
-        </ToggleButton>
-        <ToggleButton value="csv" sx={styles.uploadCSVButton}>
-          Upload CSV
-        </ToggleButton>
-      </ToggleButtonGroup>
+        <ToggleButtonGroup
+          fullWidth
+          color="primary"
+          value={selectedOption}
+          exclusive
+          onChange={(event, newOption) => setSelectedOption(newOption)}
+          sx={{ width: "100%" }}
+        >
+          <ToggleButton value="db" sx={styles.connectDB}>
+            Connect DB
+          </ToggleButton>
+          <ToggleButton value="csv" sx={styles.uploadCSVButton}>
+            Upload CSV
+          </ToggleButton>
+        </ToggleButtonGroup>
 
-      {selectedOption === 'db' && (
-        
-        <form onSubmit={handleDbConnect} style={{ width: '100%' }}>
-          <Stack spacing={2} direction="column" sx={{ width: '100%' }}>
-            {<form onSubmit={handleDbConnect} style={{ width: '100%' }}>
-          <Stack spacing={2} direction="column" sx={{ width: '100%' }}>
-            <TextField
-              label="Host"
-              variant="outlined"
-              value={host}
-              onChange={(e) => setHost(e.target.value)}
-              fullWidth
-              
-            />
-            <TextField
-              label="Database"
-              variant="outlined"
-              value={database}
-              onChange={(e) => setDatabase(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Username"
-              variant="outlined"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Password"
-              type="password"
-              variant="outlined"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              fullWidth
-            />
-            
-          </Stack>
-        </form>}
-        <br>
-        </br>
-          </Stack>
-          <div style={styles.submitButtonContainer}>
-            <LoadingButton
-              loading={isLoading}
-              type="submit"
-              variant="contained"
-              sx={styles.submitButton}
-            >
-              Submit
-            </LoadingButton>
-      </div>
-        </form>
-      )}
+        {selectedOption === "db" && (
+          <form
+            onSubmit={handleDbConnect}
+            style={{ width: "100%", height: "100%" }}
+          >
+            <Stack width="100%" height="100%" justifyContent={"space-between"}>
+              <Stack spacing={2} direction="column" sx={{ width: "100%" }}>
+                <Stack spacing={2} direction="column" sx={{ width: "100%" }}>
+                  <Stack direction={"row"} gap={2}>
+                    <Stack width="100%">
+                      <Typography
+                        variant={"body2"}
+                        fontWeight={600}
+                        color={"#3c4858"}
+                      >
+                        Host
+                      </Typography>
+                      <TextField
+                        variant="outlined"
+                        value={host}
+                        onChange={(e) => setHost(e.target.value)}
+                        fullWidth
+                      />
+                    </Stack>
+                    <Stack width="100%">
+                      <Typography
+                        variant={"body2"}
+                        fontWeight={600}
+                        color={"#3c4858"}
+                      >
+                        Database
+                      </Typography>
+                      <TextField
+                        variant="outlined"
+                        value={database}
+                        onChange={(e) => setDatabase(e.target.value)}
+                        fullWidth
+                      />
+                    </Stack>
+                  </Stack>
+                  <Stack width="100%">
+                    <Typography
+                      variant={"body2"}
+                      fontWeight={600}
+                      color={"#3c4858"}
+                    >
+                      Username
+                    </Typography>
+                    <TextField
+                      variant="outlined"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      fullWidth
+                    />
+                  </Stack>
+                  <Stack width="100%">
+                    <Typography
+                      variant={"body2"}
+                      fontWeight={600}
+                      color={"#3c4858"}
+                    >
+                      Password
+                    </Typography>
+                    <TextField
+                      type="password"
+                      variant="outlined"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      fullWidth
+                    />
+                  </Stack>
+                </Stack>
+              </Stack>
+              <Stack alignItems={"end"}>
+                <LoadingButton
+                  disabled={
+                    isLoading ||
+                    host === "" ||
+                    database === "" ||
+                    username === "" ||
+                    password === ""
+                  }
+                  loading={isLoading}
+                  type="submit"
+                  variant="contained"
+                  sx={{
+                    background: "#4FD1C5",
+                    width: "80px",
+                    fontSize: "12px",
+                    textTransform: "none",
+                    fontWeight: 600,
+                  }}
+                >
+                  Submit
+                </LoadingButton>
+              </Stack>
+            </Stack>
+          </form>
+        )}
 
-{selectedOption === 'csv' && (
-    <CsvDragDropFiles />
-  )}
-
-    </Stack>
-  </div>
-)}
-
-
-
-
-
-
+        {selectedOption === "csv" && <CsvDragDropFiles />}
+      </Stack>
+    </div>
+  );
+};
 
 export default DbDetailsForm;

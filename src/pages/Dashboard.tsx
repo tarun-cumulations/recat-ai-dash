@@ -8,52 +8,33 @@ import kpiAtom from "../models/kpiAtom";
 import questionAtom from "../models/questionAtom";
 import fileUploadAtom from "../models/fileUploadAtom";
 import { KPISectionCSV } from "../components/KPISectionCsv";
+import { useNavigate } from "react-router-dom";
+import { Details } from "./Details";
+import { useEffect } from "react";
 
 export const Dashboard = () => {
+  const isFileUploaded = useRecoilValue<boolean>(fileUploadAtom);
+  const navigate = useNavigate();
   const kpis = useRecoilValue<string[]>(kpiAtom);
   const questions = useRecoilValue<string[]>(questionAtom);
-  const isFileUploaded = useRecoilValue<boolean>(fileUploadAtom);
+
+  useEffect(() => {
+    console.log(kpis, questions);
+    if (kpis.length > 0 || questions.length > 0) {
+      navigate("/details");
+    }
+  }, [kpis, questions]);
 
   return (
     <Box
       sx={{
-        minHeight: "calc(100vh - 30px)",
+        height: "calc(100vh - 30px)",
         background: "#F2F4F6",
         padding: "15px 60px",
-        overflow: "hidden", 
+        overflow: "hidden",
       }}
     >
-      <DbDetailsForm /> 
-      <Box
-        sx={{ margin: "0 57px", display: 'flex', flexDirection: 'row', gap: '20px' }}
-      >
-        {true && (
-          <Box
-            sx={{
-              background: "#FFF",
-              width: "480px", 
-              borderRadius: "16px",
-              flexShrink: 0, 
-              overflow: "auto", 
-            }}
-          >
-
-        {localStorage.getItem('currentContext') === 'db' ? <KPISection /> : <KPISectionCSV />}
-          </Box>
-        )}
-        {(kpis.length > 0 || questions.length > 0) && true && (
-          <Box
-            sx={{
-              background: "#FFF",
-              flexGrow: 1, 
-              borderRadius: "16px",
-              overflow: "auto", 
-            }}
-          >
-            <GraphSection />
-          </Box>
-        )}
-      </Box>
+      <DbDetailsForm />
     </Box>
   );
 };

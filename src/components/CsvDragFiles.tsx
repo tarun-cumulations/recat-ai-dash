@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import csvImage from "../shared/images/csvImage.svg";
 import frameImage from "../shared/images/Frame.svg";
@@ -35,21 +35,24 @@ const CsvDragDropFiles = () => {
   const setIsFileUploaded = useSetRecoilState<boolean>(fileUploadAtom);
   const setQuery = useSetRecoilState<string>(queryAtom);
 
+  const fileInputRef = useRef(null);
 
-  const inputRef = useRef();
-
-  const handleDragOver = (event: React.SyntheticEvent) => {
-    event.preventDefault();
+  const handleFileChange = (event) => {
+    const fileSelected = event.target.files;
+    setFiles(fileSelected);
+    console.log(fileSelected);
   };
 
-  const handleDrop = (event: React.SyntheticEvent) => {
-    event.preventDefault();
-    setFiles(event.dataTransfer.files);
+  const handleButtonClick = () => {
+    // Trigger the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   // send files to the server
   const handleUpload = (event: React.SyntheticEvent) => {
-    localStorage.setItem('currentContext', 'csv');
+    localStorage.setItem("currentContext", "csv");
     event.preventDefault();
     setKpis([]);
     setIsFileUploaded(false);
@@ -77,105 +80,90 @@ const CsvDragDropFiles = () => {
 
   return (
     <>
-      <Stack sx={{ padding: "40px" }}>
-        <span
-          style={{ fontWeight: 700, fontSize: "14px", marginBottom: "24px" }}
-        >
-          Upload File
-        </span>
-        <div
-          style={{
-            height: "55px",
-            border: "dashed 1px #BDBDBD",
-            borderRadius: "6px",
-            background: "#F2F2F2",
-          }}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          <Stack
-            direction="row"
-            justifyContent={"center"}
-            alignItems={"center"}
-            margin={"5px"}
-            gap={1}
-            padding={"5px 0"}
+      <Stack
+        sx={{ width: "100%", height: "100%" }}
+        justifyContent={"space-between"}
+      >
+        <Stack alignItems={"start"} width={"100%"} sx={{ marginLeft: "10px" }}>
+          <span
+            style={{ fontWeight: 700, fontSize: "14px", marginBottom: "10px" }}
           >
-            <img src={csvImage} alt="csv" />
-            <span
-              style={{
-                fontSize: "16px",
-              }}
-            >
-              <b>Drag and drop file here or</b>
-            </span>
-            <Button
-              sx={{ textTransform: "none" }}
-              size={"small"}
-              variant="outlined"
-              onClick={() => inputRef.current.click()}
-            >
-              Browse
-            </Button>
-          </Stack>
-          <div>
-            <input
-              type="file"
-              multiple
-              onChange={(event) => {
-                if (concat && files !== null) {
-                  const fileArray = [
-                    ...Array.from(files),
-                    ...event.target.files,
-                  ];
-                  const fileList = new DataTransfer();
+            Upload File
+          </span>
+          <Button
+            disabled={isLoading}
+            onClick={handleUpload}
+            variant="contained"
+            sx={{
+              background: "#4FD1C5",
+              width: "80px",
+              height: "32px",
+              fontSize: "12px",
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+            onClick={handleButtonClick}
+          >
+            Browse
+          </Button>
+          <input
+            type="file"
+            multiple
+            accept=".csv"
+            onChange={handleFileChange}
+            ref={fileInputRef}
+            style={{ display: "none" }}
+          />
 
-                  fileArray.forEach((file) => {
-                    fileList.items.add(file);
-                  });
-
-                  setFiles(fileList.files);
-                  setConcat(false);
-                } else {
-                  setFiles(event.target.files);
-                }
-              }}
-              accept=".csv"
-              ref={inputRef}
-              style={{ display: "none" }}
-            />
-          </div>
-        </div>
-        <Stack
-          margin={"16px 0 0 0"}
-          justifyContent={"space-between"}
-          direction={"row"}
-        >
-          <Stack>
-            {files && !isEmpty(files) ? (
-              <Stack direction="row" gap={1.2}>
-                {Array.from(files).map((file, idx) => (
+          <Stack
+            margin={"10px 0 0 0"}
+            justifyContent={"space-between"}
+            direction={"row"}
+            width="100%"
+          >
+            <Stack
+              gap={1}
+              width="100%"
+              height={"210px"}
+              sx={{ overflowY: "auto" }}
+            >
+              {files !== null &&
+                Array.from(files).map((file, idx) => (
                   <Stack
                     sx={{
-                      border: "1px dashed #BDBDBD",
-                      width: "48px",
-                      height: "48px",
-                      borderRadius: "8px",
+                      border: "1px solid #e5e9f2",
+                      width: "96%",
+                      height: "32px",
+                      minHeight: "32px",
+                      borderRadius: "4px",
                       position: "relative",
+                      padding: "0 10px",
+                      background: "#f1f2f6",
                     }}
                     alignItems={"center"}
-                    justifyContent={"center"}
+                    direction="row"
+                    justifyContent={"space-between"}
+                    onClick={() => {
+                      console.log(file);
+                    }}
                   >
-                    <img style={{ width: "24px" }} src={csvImage} alt="empty" />
+                    <Stack direction="row" gap={3}>
+                      <Typography fontWeight={600} variant={"body2"}>
+                        {file.name}
+                      </Typography>
+                      <Typography
+                        fontWeight={500}
+                        variant={"body2"}
+                        color={"#8391A7"}
+                      >
+                        {file.size} kb
+                      </Typography>
+                    </Stack>
+
                     <Stack
                       sx={{
-                        background: "#E53535",
-                        position: "absolute",
-                        borderRadius: "50%",
                         width: "18px",
                         height: "18px",
-                        top: "-5px",
-                        right: "-5px",
                         cursor: "pointer",
                       }}
                       onClick={() => {
@@ -193,66 +181,30 @@ const CsvDragDropFiles = () => {
                     >
                       <Close
                         fontSize={"18px"}
-                        sx={{ margin: "auto", color: "#FFF" }}
+                        sx={{ margin: "auto", color: "#8391A7" }}
                       />
                     </Stack>
                   </Stack>
                 ))}
-                <Stack
-                  sx={{
-                    border: "1px dashed #BDBDBD",
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                  }}
-                  alignItems={"center"}
-                  justifyContent={"center"}
-                  onClick={() => {
-                    setConcat(true);
-                    inputRef.current.click();
-                  }}
-                >
-                  <img
-                    style={{ width: "24px" }}
-                    src={addMoreImage}
-                    alt="empty"
-                  />
-                </Stack>
-              </Stack>
-            ) : (
-              <Stack
-                sx={{
-                  border: "1px dashed #BDBDBD",
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "8px",
-                }}
-                alignItems={"center"}
-                justifyContent={"center"}
-              >
-                <img style={{ width: "24px" }} src={frameImage} alt="empty" />
-              </Stack>
-            )}
+            </Stack>
           </Stack>
-          <Stack>
-            <LoadingButton
-              disabled={isLoading || files === null || isEmpty(files)}
-              loading={isLoading}
-              onClick={handleUpload}
-              variant="contained"
-              sx={{
-                background: "#4FD1C5",
-                width: "80px",
-                height: "32px",
-                fontSize: "12px",
-                textTransform: "none",
-                fontWeight: 600,
-              }}
-            >
-              Continue
-            </LoadingButton>
-          </Stack>
+        </Stack>
+        <Stack alignItems={"end"}>
+          <LoadingButton
+            disabled={isLoading || files === null || isEmpty(files)}
+            loading={isLoading}
+            onClick={handleUpload}
+            variant="contained"
+            sx={{
+              background: "#4FD1C5",
+              width: "80px",
+              fontSize: "12px",
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            Submit
+          </LoadingButton>
         </Stack>
       </Stack>
     </>
